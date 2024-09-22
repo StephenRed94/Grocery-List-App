@@ -1,0 +1,33 @@
+.groceryContainer {
+    display: flex;
+    width: 100%;
+    height: 100vh;   
+}
+
+.searchSide {
+    flex: 2;
+    width: 100%;
+    height: 100vh;  
+  }
+
+  .listSide {
+    flex: 1;
+    width: 100%;
+    height: 100vh;  
+  }
+
+  h1 {
+    padding: 20px;
+  }
+
+  #productGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .addToListButton {
+    width: fit-content;
+    height: fit-content;
+  }
+

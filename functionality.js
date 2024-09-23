@@ -1,3 +1,5 @@
+const groceryList = [];
+
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('searchButton').addEventListener('click', function() {
         const userInput = document.getElementById('searchBox').value;
@@ -16,7 +18,6 @@ async function search (userInput) {
     const productGridContainer = document.getElementById('productGrid');
     const list = document.getElementById('list');
     const displayedProducts = new Set();
-    const groceryList = [];
     productGridContainer.innerHTML = '';
     try {
         const response = await fetch(url);
@@ -39,15 +40,38 @@ async function search (userInput) {
                 addToListButton.className = 'addToListButton';
                 addToListButton.textContent = 'Add To List'
                 addToListButton.addEventListener('click', function () {
+                    list.innerHTML = '';
                     let food = foodName;
                     let quantityValue = parseInt(quantityInput.value);
+                    let productExists = false;
                     const product = {
                         name: food,
                         quantity: quantityValue
                     }
-                    
-                    groceryList.push(product);
-                    console.log(groceryList);
+                    for(let i = 0; i < groceryList.length; i++) {
+                        if(groceryList[i].name === foodName) {
+                            groceryList[i].quantity += quantityValue;
+                            productExists = true;
+                            break; 
+                        }
+                    }
+
+                    if(!productExists){
+                        groceryList.push(product);
+                    }
+
+                    groceryList.forEach(product => {
+                        const listItem = document.createElement('li');
+                        const removeButton = document.createElement('button');
+                        removeButton.addEventListener('click', function () {
+                            
+                        })
+                        removeButton.textContent = 'X';
+                        listItem.textContent = `${product.name} X ${product.quantity}`;
+                        listItem.appendChild(removeButton);
+                        list.appendChild(listItem);
+                    })
+                  
             })
 
             foodItem.className = 'foodItem';

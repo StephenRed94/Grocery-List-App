@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         else {
             alert("Please type something in");
+            clearProductContainer();
         }
     })
 });
@@ -16,17 +17,16 @@ document.addEventListener('DOMContentLoaded', function() {
 async function search (userInput) {
     const url = `https://api.nal.usda.gov/fdc/v1/foods/search?query=${userInput}&api_key=eUGeLH7Kzwb3LjivB8RPm26XEHZZIlbyhm4tMW3A`;
     const productGridContainer = document.getElementById('productGrid');
-    const list = document.getElementById('list');
     const displayedProducts = new Set();
-    productGridContainer.innerHTML = '';
+    clearProductContainer();
     try {
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error('Network Response Error');
           }
-
+          else {
           const data = await response.json();
-
+        if(data.foods.length > 0) {
           data.foods.forEach(food => {
             const foodName = food.description;
             if (!displayedProducts.has(foodName)) {
@@ -40,10 +40,11 @@ async function search (userInput) {
                 addToListButton.className = 'addToListButton';
                 addToListButton.textContent = 'Add To List'
                 addToListButton.addEventListener('click', function () {
-                    list.innerHTML = '';
                     let food = foodName;
                     let quantityValue = parseInt(quantityInput.value);
                     let productExists = false;
+                    const listContainer = document.getElementById('listContainer');
+                    listContainer.innerHTML = '';
                     const product = {
                         name: food,
                         quantity: quantityValue
@@ -60,18 +61,7 @@ async function search (userInput) {
                         groceryList.push(product);
                     }
 
-                    groceryList.forEach(product => {
-                        const listItem = document.createElement('li');
-                        const removeButton = document.createElement('button');
-                        removeButton.addEventListener('click', function () {
-                            
-                        })
-                        removeButton.textContent = 'X';
-                        listItem.textContent = `${product.name} X ${product.quantity}`;
-                        listItem.appendChild(removeButton);
-                        list.appendChild(listItem);
-                    })
-                  
+                    renderGroceryList();
             })
 
             foodItem.className = 'foodItem';
@@ -84,9 +74,57 @@ async function search (userInput) {
             productGridContainer.appendChild(foodItem);
         }
           });
+
+        }
+
+    else {
+        clearProductContainer();
+        const noProductFoundMessage = document.createElement('div');
+        noProductFoundMessage.innerHTML = 'Product Not Found'
+        productGridContainer.appendChild(noProductFoundMessage);
+    }
+}
         } catch (error) {
           console.error('No Products Found', error);
         }
+    }
 
+    function renderGroceryList() {
+        const listContainer = document.getElementById('listContainer');
+        let list = listContainer.querySelector('ul');
+        if(!list) {
+            list = document.createElement('ul');
+            listContainer.appendChild(list);
+        }
 
+        else {
+            list.innerHTML = '';
+        }
+
+        if(groceryList.length > 0) {
+
+         groceryList.forEach((product, index) => {
+                        const listItem = document.createElement('li');
+                        const removeButton = document.createElement('button');
+                        removeButton.addEventListener('click', function () {
+                            groceryList.splice(index, 1);
+                            renderGroceryList();
+                        })
+                        removeButton.textContent = 'X';
+                        listItem.textContent = `${product.name} X ${product.quantity}`;
+                        listItem.appendChild(removeButton);
+                        list.appendChild(listItem);
+                    })
+
+                }
+        else {
+            const emptyListMessage = document.createElement('div');
+            emptyListMessage.textContent = "List Empty";
+            listContainer.appendChild(emptyListMessage);
+        }
+    }
+
+    function clearProductContainer () {
+        const gridContainer = document.getElementById('productGrid');
+        gridContainer.innerHTML = '';
     }

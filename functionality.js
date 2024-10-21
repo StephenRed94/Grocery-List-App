@@ -238,6 +238,7 @@ async function search (userInput) {
                         const quantityField = document.createElement('input');
                         const saveButton = document.createElement('button');
                         const quantityContainer = document.createElement('div');
+                        const currentProductName = product.name;
                         quantityContainer.className = 'quantityContainer';
                         saveButton.textContent = 'Save';
                         saveButton.className = 'listButtons';
@@ -268,7 +269,7 @@ async function search (userInput) {
                             const updatedQuantity = parseInt(quantityField.value, 10);
                             if(updatedQuantity > 0) {
                             const updatedProducts = storedProducts.map(p => {
-                                if (p.name === product.name) {
+                                if (p.name === currentProductName) {
                                     return ({...p, quantity: updatedQuantity});
                                 }
 
@@ -282,7 +283,7 @@ async function search (userInput) {
                         }
 
                         else if (updatedQuantity === 0) {
-                            removeItem(product.name);
+                            removeItem(currentProductName);
                         }
 
                         else {

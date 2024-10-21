@@ -22,12 +22,15 @@
         </div>
         <div id="productGrid"></div>
         <div class="manualSearch">
-          <label for="productInput">Enter Product Manually:</label>
+          <label for="productName">Enter Product Manually:</label>
           <input
             type="text"
-            id="productInput"
+            id="productName"
             placeholder="Enter product name here..."
           />
+          <label for="productQuantity">Enter Product Quantity:</label>
+          <input type="number" id="productQuantity" min="1" value="1" />
+          <button id="manualAddToListButton">Add To List</button>
         </div>
       </div>
       <div class="listSide">

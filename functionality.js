@@ -1,4 +1,9 @@
 const groceryList = [];
+let food;
+let quantityValue;
+let quantityInput;
+let foodItem;
+let productExists = false;
 
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('searchButton').addEventListener('click', function() {
@@ -13,6 +18,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     })
 });
+
+document.getElementById('manualAddToListButton').addEventListener('click', function() {
+    foodItem = document.getElementById('productName');
+    food = foodItem.value;
+    quantityInput = document.getElementById('productQuantity');
+    quantityValue = parseInt(quantityInput.value);
+    alert(`${food} and ${quantityValue}`);
+})
 
 async function search (userInput) {
     const url = `https://api.nal.usda.gov/fdc/v1/foods/search?query=${userInput}&api_key=eUGeLH7Kzwb3LjivB8RPm26XEHZZIlbyhm4tMW3A`;
@@ -31,8 +44,8 @@ async function search (userInput) {
             const foodName = food.description;
             if (!displayedProducts.has(foodName)) {
                 displayedProducts.add(foodName);
-                const foodItem = document.createElement('div');
-                const quantityInput = document.createElement('input');
+                foodItem = document.createElement('div');
+                quantityInput = document.createElement('input');
                 quantityInput.type = 'number';
                 quantityInput.min = '1';
                 quantityInput.value = '1';
@@ -40,9 +53,9 @@ async function search (userInput) {
                 addToListButton.className = 'addToListButton';
                 addToListButton.textContent = 'Add To List'
                 addToListButton.addEventListener('click', function () {
-                    let food = foodName;
-                    let quantityValue = parseInt(quantityInput.value);
-                    let productExists = false;
+                    food = foodName;
+                    quantityValue = parseInt(quantityInput.value);
+                    productExists = false;
                     const listContainer = document.getElementById('listContainer');
                     listContainer.innerHTML = '';
                     const product = {

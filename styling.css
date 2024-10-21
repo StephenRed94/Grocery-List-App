@@ -236,8 +236,8 @@ ul {
     border: none;
     background: #BB86FC;
     border-radius: 4px;
-    color: black;
-    text-decoration: none; 
+    color: black !important;
+    text-decoration: none !important; 
   }
 
   #decButton,#incButton {

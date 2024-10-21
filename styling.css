@@ -282,7 +282,7 @@ ul {
     }
 
     .listContainer {
-      justify-content: left;
+     align-items: center;
 
     }
 

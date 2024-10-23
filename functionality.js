@@ -46,11 +46,12 @@ document.getElementById('manualAddToListButton').addEventListener('click', funct
     const food = foodItem.value;
     const quantityInput = document.getElementById('productQuantity');
     const quantityValue = parseInt(quantityInput.value);
+    let isChecked = false;
     foodItem.value = '';
     if(food){
        if(quantityValue > 0){
         quantityInput.value = '1';
-        addToGroceryList(food, quantityValue);
+        addToGroceryList(food, quantityValue, isChecked);
     }
 
     else {
@@ -94,6 +95,7 @@ async function search (userInput) {
                 const foodItem = document.createElement('div');
                 const quantityInput = document.createElement('input');
                 const quantityContainer = document.createElement('div');
+                let isChecked = false;
                 quantityInput.type = 'number';
                 quantityInput.className = 'quantityFieldBox';
                 quantityInput.min = '1';
@@ -108,7 +110,7 @@ async function search (userInput) {
                 addToListButton.addEventListener('click', function () {
                     const quantityValue = parseInt(quantityInput.value, 10);
                     if (quantityInput.value > 0) {
-                    addToGroceryList(foodName, quantityValue);
+                    addToGroceryList(foodName, quantityValue, isChecked);
                     }
 
                     else {
@@ -135,6 +137,7 @@ async function search (userInput) {
     else {
         clearProductContainer();
         const noProductFoundMessage = document.createElement('div');
+        noProductFoundMessage.className = 'noProductFoundMessage';
         noProductFoundMessage.innerHTML = 'Product Not Found'
         productGridContainer.appendChild(noProductFoundMessage);
     }
@@ -145,13 +148,13 @@ async function search (userInput) {
     }
 
     // Adds the item to the grocery list
-    function addToGroceryList(foodName, quantityValue) {
+    function addToGroceryList(foodName, quantityValue, isChecked) {
         let groceryList = JSON.parse(localStorage.getItem('groceryProducts')) || [];
         const existingProductIndex = groceryList.findIndex(product => product.name === foodName);
         if (existingProductIndex !== -1) {
             groceryList[existingProductIndex].quantity += quantityValue;
         } else {
-            groceryList.push({ name: foodName, quantity: quantityValue });
+            groceryList.push({ name: foodName, quantity: quantityValue, checked: isChecked  });
         }
 
         saveToLocalStorage(groceryList);
@@ -177,49 +180,79 @@ async function search (userInput) {
                 storedProducts.forEach(product => {
                     const listItem = document.createElement('li');
                     const listItemContainer = document.createElement('div');
+                    let isEditing = false;
                     listItemContainer.className = 'listItemContainer';
                     listItem.className = 'listItem';
                     // Creates a label for the custom checkbox
                     const itemCheckbox = document.createElement('label');
                     itemCheckbox.className = 'itemCheckbox';
 
-                    // Creates a hidden checkbox 
-                    const hiddenCheckbox = document.createElement('input');
-                    hiddenCheckbox.type = 'checkbox';
-                    hiddenCheckbox.className = 'hiddenCheckbox';
 
-                    // Creates visual checkbox
+                    // Creates checkbox
                     const checkbox = document.createElement('span');
                     checkbox.className = 'checkbox';
 
+                         // Product Name and Quantity Spans
+                     const productInfoContainer = document.createElement('div');
+                     const productNameSpan = document.createElement('span');
+                     productNameSpan.className = 'productNameSpan';
+                     const quantitySpan = document.createElement('span');
+                     quantitySpan.className = 'quantitySpan';
+                     productNameSpan.textContent = `${product.name} x `;
+                     quantitySpan.textContent = `${product.quantity}`;
+             
+     
+                         // Modify and Remove buttons
+                     const listButtonContainer = document.createElement('div');
+                     listButtonContainer.className = 'listButtonContainer';
+                     const modifyButton = document.createElement('button');
+                     const removeButton = document.createElement('button');
+                     const saveButton = document.createElement('button');
+                     saveButton.textContent = 'Save';
+                     saveButton.className = 'listButtons';
+                     removeButton.className = 'listButtons';
+                     modifyButton.className = 'listButtons';
+                     removeButton.textContent = 'Remove';
+                     modifyButton.textContent = 'Edit';
+                     listButtonContainer.appendChild(modifyButton);
+                     listButtonContainer.appendChild(removeButton);
+
+                    if (product.checked) {
+                        checkbox.classList.add('checked');
+                        listItemContainer.classList.add('inactive');
+                        modifyButton.disabled = true;
+                        removeButton.disabled = true;
+                    }
+
                     //Checkbox event listener
                     checkbox.addEventListener('click', () => {
+                        if(isEditing) {
+                            alert('Please save your edit before checking off the item.')
+                            return;
+                        }
                         checkbox.classList.toggle('checked');
-                    })
-        
-                    // Product Name and Quantity Spans
-                    const productInfoContainer = document.createElement('div');
-                    const productNameSpan = document.createElement('span');
-                    productNameSpan.className = 'productNameSpan';
-                    const quantitySpan = document.createElement('span');
-                    quantitySpan.className = 'quantitySpan';
-                    productNameSpan.textContent = `${product.name} x `;
-                    quantitySpan.textContent = `${product.quantity}`;
+                        if (checkbox.classList.contains('checked')) {
+                            product.checked = true;
+                            listItemContainer.classList.add('inactive');
+                            modifyButton.disabled = true;
+                            removeButton.disabled = true;
+                            saveButton.disabled = true;
+                        }
 
-                    // Modify and Remove buttons
-                    const listButtonContainer = document.createElement('div');
-                    listButtonContainer.className = 'listButtonContainer';
-                    const modifyButton = document.createElement('button');
-                    const removeButton = document.createElement('button');
-                    removeButton.className = 'listButtons';
-                    modifyButton.className = 'listButtons';
-                    removeButton.textContent = 'Remove';
-                    modifyButton.textContent = 'Edit';
-                    listButtonContainer.appendChild(modifyButton);
-                    listButtonContainer.appendChild(removeButton);
+                        else {
+                            product.checked = false;
+                            listItemContainer.classList.remove('inactive');
+                            modifyButton.disabled = false;
+                            removeButton.disabled = false;
+                            saveButton.disabled = false;
+                        }
+
+                        saveToLocalStorage(storedProducts);
+                    })
+
+    
 
                     // Build the checkbox
-                    itemCheckbox.appendChild(hiddenCheckbox);
                     itemCheckbox.appendChild(checkbox);
 
                     // Build the list item
@@ -235,12 +268,10 @@ async function search (userInput) {
                         removeItem(product.name);
                     })
                     modifyButton.addEventListener('click', function () {
+                        isEditing = true;
                         const quantityField = document.createElement('input');
-                        const saveButton = document.createElement('button');
                         const quantityContainer = document.createElement('div');
                         quantityContainer.className = 'quantityContainer';
-                        saveButton.textContent = 'Save';
-                        saveButton.className = 'listButtons';
                         quantityField.type = 'number';
                         quantityField.min = '1';
                         quantityField.value = quantitySpan.textContent;
@@ -265,6 +296,7 @@ async function search (userInput) {
                         */
 
                         saveButton.addEventListener('click', function () {
+                            isEditing = false;
                             const updatedQuantity = parseInt(quantityField.value, 10);
                             if(updatedQuantity > 0) {
                             let updatedProducts = storedProducts.map(p => {

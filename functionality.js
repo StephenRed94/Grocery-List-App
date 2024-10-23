@@ -1,5 +1,4 @@
 
-let groceryList = [];
 // Event Listener for the Search Button
 document.addEventListener('DOMContentLoaded', function() {
     renderGroceryList();
@@ -49,8 +48,9 @@ document.getElementById('manualAddToListButton').addEventListener('click', funct
     const quantityValue = parseInt(quantityInput.value);
     foodItem.value = '';
     if(food){
-        if(quantityValue > 0){
-       addToGroceryList(food, quantityValue);
+       if(quantityValue > 0){
+        quantityInput.value = '1';
+        addToGroceryList(food, quantityValue);
     }
 
     else {
@@ -162,7 +162,7 @@ async function search (userInput) {
             const listContainer = document.getElementById('listContainer');
             listContainer.innerHTML = '';
             const storedProductsString = localStorage.getItem('groceryProducts');
-            const storedProducts = JSON.parse(storedProductsString) || [];
+            let storedProducts = JSON.parse(storedProductsString) || [];
 
                 if(storedProducts.length === 0){
                     const emptyListMessage = document.createElement('div');
@@ -238,7 +238,6 @@ async function search (userInput) {
                         const quantityField = document.createElement('input');
                         const saveButton = document.createElement('button');
                         const quantityContainer = document.createElement('div');
-                        const currentProductName = product.name;
                         quantityContainer.className = 'quantityContainer';
                         saveButton.textContent = 'Save';
                         saveButton.className = 'listButtons';
@@ -262,14 +261,14 @@ async function search (userInput) {
                         /*
                             This create an updated array that uses the map method to create a new array based on the storedProducts array.
                             It them compares the names of each product to find the matching one and updates the quantity with the one entered.
-                            The updated array is then saved back to local storage. And displayed once the renderGroceryList function is called.
+                            The updated array is then saved back to local storage.
                         */
 
                         saveButton.addEventListener('click', function () {
                             const updatedQuantity = parseInt(quantityField.value, 10);
                             if(updatedQuantity > 0) {
-                            const updatedProducts = storedProducts.map(p => {
-                                if (p.name === currentProductName) {
+                            let updatedProducts = storedProducts.map(p => {
+                                if (p.name === product.name) {
                                     return ({...p, quantity: updatedQuantity});
                                 }
 
@@ -278,12 +277,23 @@ async function search (userInput) {
                                 }
                             })
                             saveToLocalStorage(updatedProducts);
-                            renderGroceryList();
+
+                            /* 
+                                The storedProducts array is then assigned the new updatedProducts array. If this is not included then the 
+                                storedProducts array will not be the most up to date.This ensure that each time the storedProducts array is mapped
+                                over it is creating a new array based on the most up to date data.
+                            */
+                            storedProducts = updatedProducts;
+                            
+                        // Update the DOM with the updated quantity
+                        quantitySpan.textContent = `${updatedQuantity}`;
+                        productInfoContainer.replaceChild(quantitySpan, quantityContainer);
+                        listButtonContainer.replaceChild(modifyButton, saveButton);
 
                         }
 
                         else if (updatedQuantity === 0) {
-                            removeItem(currentProductName);
+                            removeItem(product.name);
                         }
 
                         else {
@@ -294,6 +304,8 @@ async function search (userInput) {
             })
             }
         }
+
+    
 
     function createDecreaseButton () {
         const decreaseButton = document.createElement('button');
@@ -327,7 +339,7 @@ async function search (userInput) {
 
     function removeItem (productName) {
         const storedProductsString = localStorage.getItem('groceryProducts');
-        const storedProducts = JSON.parse(storedProductsString) || [];
+        let storedProducts = JSON.parse(storedProductsString) || [];
         const updatedGroceryList = storedProducts.filter(p => p.name !== productName);
         saveToLocalStorage(updatedGroceryList);
         renderGroceryList();

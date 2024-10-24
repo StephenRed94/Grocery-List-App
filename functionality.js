@@ -1,4 +1,5 @@
 
+
 // Event Listener for the Search Button
 document.addEventListener('DOMContentLoaded', function() {
     renderGroceryList();
@@ -43,29 +44,33 @@ document.getElementById('manIncreaseButton').addEventListener('click', function 
 // Event Listener for manually adding a product)
 document.getElementById('manualAddToListButton').addEventListener('click', function() {
     const foodItem = document.getElementById('productName');
-    const food = foodItem.value;
+    const food = foodItem.value.trim();
     const quantityInput = document.getElementById('productQuantity');
     const quantityValue = parseInt(quantityInput.value);
     let isChecked = false;
-    foodItem.value = '';
     if(food){
-       if(quantityValue > 0){
-        quantityInput.value = '1';
-        addToGroceryList(food, quantityValue, isChecked);
+        if (quantityValue > 0) {
+            if(quantityValue <= 100){ 
+                addToGroceryList(food, quantityValue, isChecked);
+                quantityInput.value = '1';
+                foodItem.value = '';
+            }
+
+            else {
+                alert('The maximum allowed quantity is 100. Please enter a lower quantity.');
+            }
+        }
+        else {
+            alert('Please enter a valid quantity greater than 0.');
+        }
     }
 
     else {
-        alert('Please enter a valid quantity');
-    }
-
-    }
-
-    else {
-        alert('Product Name Empty')
+        alert('Product Name Empty');
     }
 
 
-})
+});
 
 // Clears groceryList array and the list
 document.getElementById('clearButton').addEventListener('click', function() {
@@ -109,14 +114,20 @@ async function search (userInput) {
                 addToListButton.textContent = 'Add To List'
                 addToListButton.addEventListener('click', function () {
                     const quantityValue = parseInt(quantityInput.value, 10);
-                    if (quantityInput.value > 0) {
-                    addToGroceryList(foodName, quantityValue, isChecked);
+                    if(quantityInput.value > 0) {
+                        if(quantityInput.value <= 100) {
+                        addToGroceryList(foodName, quantityValue, isChecked);
+                        }
+                        else {
+                            alert('The maximum allowed quantity is 100. Please enter a lower quantity.');
+                        }
                     }
 
                     else {
-                        alert('Please enter a valid quantity');
+                        alert('Please enter a valid quantity greater than 0.');
                     }
-            })
+                
+                })
 
             foodItem.className = 'foodItem';
             foodItem.innerHTML = `
@@ -151,15 +162,24 @@ async function search (userInput) {
     function addToGroceryList(foodName, quantityValue, isChecked) {
         let groceryList = JSON.parse(localStorage.getItem('groceryProducts')) || [];
         const existingProductIndex = groceryList.findIndex(product => product.name === foodName);
-        if (existingProductIndex !== -1) {
-            groceryList[existingProductIndex].quantity += quantityValue;
+            if (existingProductIndex !== -1) {
+                const newQuantity = groceryList[existingProductIndex].quantity + quantityValue;
+                if(newQuantity > 100) {
+                    alert('The maximum allowed quantity is 100. Please enter a lower quantity.');
+                    return;
+                }
+                groceryList[existingProductIndex].quantity = newQuantity;
         } else {
             groceryList.push({ name: foodName, quantity: quantityValue, checked: isChecked  });
         }
 
         saveToLocalStorage(groceryList);
         renderGroceryList();
-    }
+
+         }
+
+
+
 
     function renderGroceryList() {
             const listContainer = document.getElementById('listContainer');
@@ -299,14 +319,15 @@ async function search (userInput) {
                             isEditing = false;
                             const updatedQuantity = parseInt(quantityField.value, 10);
                             if(updatedQuantity > 0) {
-                            let updatedProducts = storedProducts.map(p => {
-                                if (p.name === product.name) {
-                                    return ({...p, quantity: updatedQuantity});
-                                }
+                                if(updatedQuantity <= 100) {
+                                let updatedProducts = storedProducts.map(p => {
+                                    if (p.name === product.name) {
+                                        return ({...p, quantity: updatedQuantity});
+                                    }
 
-                                else {
-                                    return p;
-                                }
+                                    else {
+                                        return p;
+                                    }
                             })
                             saveToLocalStorage(updatedProducts);
 
@@ -323,6 +344,11 @@ async function search (userInput) {
                         listButtonContainer.replaceChild(modifyButton, saveButton);
 
                         }
+
+                        else {
+                            alert('The maximum allowed quantity is 100. Please enter a lower quantity.');
+                        }
+                    }
 
                         else if (updatedQuantity === 0) {
                             removeItem(product.name);
@@ -365,7 +391,9 @@ async function search (userInput) {
 
     function increaseButtonFunc (quantityInput) {
         const currentQuantity = parseInt(quantityInput.value);
+        if(currentQuantity < 100) {
         quantityInput.value = currentQuantity + 1;
+        }
     }
     
 

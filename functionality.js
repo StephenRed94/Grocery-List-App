@@ -51,9 +51,11 @@ document.getElementById('manualAddToListButton').addEventListener('click', funct
     if(food){
         if (quantityValue > 0) {
             if(quantityValue <= 100){ 
-                addToGroceryList(food, quantityValue, isChecked);
-                quantityInput.value = '1';
-                foodItem.value = '';
+                const result = addToGroceryList(food, quantityValue, isChecked);
+                if(result) {
+                    quantityInput.value = '1';
+                    foodItem.value = '';
+                }
             }
 
             else {
@@ -166,7 +168,7 @@ async function search (userInput) {
                 const newQuantity = groceryList[existingProductIndex].quantity + quantityValue;
                 if(newQuantity > 100) {
                     alert('The maximum allowed quantity is 100. Please enter a lower quantity.');
-                    return;
+                    return false;
                 }
                 groceryList[existingProductIndex].quantity = newQuantity;
         } else {

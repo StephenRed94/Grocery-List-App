@@ -177,6 +177,7 @@ async function search (userInput) {
 
         saveToLocalStorage(groceryList);
         renderGroceryList();
+        return true;
 
          }
 

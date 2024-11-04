@@ -320,7 +320,7 @@ ul {
     }
 
     .searchButton, .clearSearchButton, .manualAddToListButton, .clearButton, .addToListButton {
-      height: 35px;
+      height: 40px;
     }
 
     .listButtons {
@@ -351,6 +351,7 @@ ul {
     .listSide {
       margin-top: 50px;
       width: 100%;
+      height: auto;
   }
   
   }
@@ -364,6 +365,7 @@ ul {
     .listSide 
     {
       width: 45%;
+      height: auto;
     }
 }
 

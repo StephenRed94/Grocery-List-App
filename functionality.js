@@ -74,7 +74,7 @@ document.getElementById('manualAddToListButton').addEventListener('click', funct
 
 });
 
-// Clears groceryList array and the list
+// Clears local storage
 document.getElementById('clearButton').addEventListener('click', function() {
     localStorage.clear();
     renderGroceryList();
@@ -85,6 +85,8 @@ document.getElementById('clearButton').addEventListener('click', function() {
 async function search (userInput) {
     const url = `https://api.nal.usda.gov/fdc/v1/foods/search?query=${userInput}&api_key=eUGeLH7Kzwb3LjivB8RPm26XEHZZIlbyhm4tMW3A`;
     const productGridContainer = document.getElementById('productGrid');
+    
+    // This creates a new set for the products that are to be displayed
     const displayedProducts = new Set();
     clearProductContainer();
     try {
@@ -99,6 +101,8 @@ async function search (userInput) {
             const foodName = food.description;
             if (!displayedProducts.has(foodName)) {
                 displayedProducts.add(foodName);
+
+                // Creating the Product Grid
                 const foodItem = document.createElement('div');
                 const quantityInput = document.createElement('input');
                 const quantityContainer = document.createElement('div');
@@ -107,13 +111,17 @@ async function search (userInput) {
                 quantityInput.className = 'quantityFieldBox';
                 quantityInput.min = '1';
                 quantityInput.value = '1';
+
+                // Increase and decrease buttons for the Quantity field
                 const decreaseButton = createDecreaseButton();
                 decreaseButton.addEventListener('click', () => decreaseButtonFunc(quantityInput));
                 const increaseButton = createIncreaseButton();
                 increaseButton.addEventListener('click', () => increaseButtonFunc(quantityInput));
                 const addToListButton = document.createElement('button');
+
+                //addToList button creation along with it's event listener
                 addToListButton.className = 'addToListButton';
-                addToListButton.textContent = 'Add To List'
+                addToListButton.textContent = 'Add To List';
                 addToListButton.addEventListener('click', function () {
                     const quantityValue = parseInt(quantityInput.value, 10);
                     if(quantityInput.value > 0) {
@@ -136,6 +144,7 @@ async function search (userInput) {
             <h3>${foodName}</h3>
             `;
             
+            // Building the controls for the Product Grid
             quantityContainer.appendChild(decreaseButton);
             quantityContainer.appendChild(quantityInput);
             quantityContainer.appendChild(increaseButton);
@@ -163,7 +172,13 @@ async function search (userInput) {
     // Adds the item to the grocery list
     function addToGroceryList(foodName, quantityValue, isChecked) {
         let groceryList = JSON.parse(localStorage.getItem('groceryProducts')) || [];
+
+        /* 
+            If the product being added to the Grocery List is already in the Grocery List it's index 
+            is saved to the existingproductIndex variable.
+        */
         const existingProductIndex = groceryList.findIndex(product => product.name === foodName);
+            // If the product is found the new quantity is added to the previous quantity
             if (existingProductIndex !== -1) {
                 const newQuantity = groceryList[existingProductIndex].quantity + quantityValue;
                 if(newQuantity > 100) {
@@ -171,6 +186,7 @@ async function search (userInput) {
                     return false;
                 }
                 groceryList[existingProductIndex].quantity = newQuantity;
+        // If the product is not found it is added to the Grocery List
         } else {
             groceryList.push({ name: foodName, quantity: quantityValue, checked: isChecked  });
         }
@@ -183,13 +199,14 @@ async function search (userInput) {
 
 
 
-
+    // Renders and dislays the Grocery list     
     function renderGroceryList() {
             const listContainer = document.getElementById('listContainer');
             listContainer.innerHTML = '';
             const storedProductsString = localStorage.getItem('groceryProducts');
             let storedProducts = JSON.parse(storedProductsString) || [];
 
+                // If the Grocery List is empty. The 'List is Empty' message is shown.
                 if(storedProducts.length === 0){
                     const emptyListMessage = document.createElement('div');
                     emptyListMessage.textContent = 'List is Empty';
@@ -197,177 +214,184 @@ async function search (userInput) {
 
                 }
 
-            else {
-               const list = document.createElement('ul');
-                listContainer.appendChild(list);
-                storedProducts.forEach(product => {
-                    const listItem = document.createElement('li');
-                    const listItemContainer = document.createElement('div');
-                    let isEditing = false;
-                    listItemContainer.className = 'listItemContainer';
-                    listItem.className = 'listItem';
-                    // Creates a label for the custom checkbox
-                    const itemCheckbox = document.createElement('label');
-                    itemCheckbox.className = 'itemCheckbox';
+                // If the Grocery List is populated each product has it's own list item created for it to be displayed.
+                else {
+                const list = document.createElement('ul');
+                    listContainer.appendChild(list);
+                    storedProducts.forEach(product => {
+                        const listItem = document.createElement('li');
+                        const listItemContainer = document.createElement('div');
+                        let isEditing = false;
+                        listItemContainer.className = 'listItemContainer';
+                        listItem.className = 'listItem';
+
+                        // Creates a label for the custom checkbox
+                        const itemCheckbox = document.createElement('label');
+                        itemCheckbox.className = 'itemCheckbox';
 
 
-                    // Creates checkbox
-                    const checkbox = document.createElement('span');
-                    checkbox.className = 'checkbox';
+                        // Creates checkbox
+                        const checkbox = document.createElement('span');
+                        checkbox.className = 'checkbox';
 
                          // Product Name and Quantity Spans
-                     const productInfoContainer = document.createElement('div');
-                     const productNameSpan = document.createElement('span');
-                     productNameSpan.className = 'productNameSpan';
-                     const quantitySpan = document.createElement('span');
-                     quantitySpan.className = 'quantitySpan';
-                     productNameSpan.textContent = `${product.name} x `;
-                     quantitySpan.textContent = `${product.quantity}`;
-             
-     
-                         // Modify and Remove buttons
-                     const listButtonContainer = document.createElement('div');
-                     listButtonContainer.className = 'listButtonContainer';
-                     const modifyButton = document.createElement('button');
-                     const removeButton = document.createElement('button');
-                     const saveButton = document.createElement('button');
-                     saveButton.textContent = 'Save';
-                     saveButton.className = 'listButtons';
-                     removeButton.className = 'listButtons';
-                     modifyButton.className = 'listButtons';
-                     removeButton.textContent = 'Remove';
-                     modifyButton.textContent = 'Edit';
-                     listButtonContainer.appendChild(modifyButton);
-                     listButtonContainer.appendChild(removeButton);
+                        const productInfoContainer = document.createElement('div');
+                        const productNameSpan = document.createElement('span');
+                        productNameSpan.className = 'productNameSpan';
+                        const quantitySpan = document.createElement('span');
+                        quantitySpan.className = 'quantitySpan';
+                        productNameSpan.textContent = `${product.name} x `;
+                        quantitySpan.textContent = `${product.quantity}`;
+                
+        
+                        // Modify and Remove buttons
+                        const listButtonContainer = document.createElement('div');
+                        listButtonContainer.className = 'listButtonContainer';
+                        const modifyButton = document.createElement('button');
+                        const removeButton = document.createElement('button');
+                        const saveButton = document.createElement('button');
+                        saveButton.textContent = 'Save';
+                        saveButton.className = 'listButtons';
+                        removeButton.className = 'listButtons';
+                        modifyButton.className = 'listButtons';
+                        removeButton.textContent = 'Remove';
+                        modifyButton.textContent = 'Edit';
+                        listButtonContainer.appendChild(modifyButton);
+                        listButtonContainer.appendChild(removeButton);
 
-                    if (product.checked) {
-                        checkbox.classList.add('checked');
-                        listItemContainer.classList.add('inactive');
-                        modifyButton.disabled = true;
-                        removeButton.disabled = true;
-                    }
 
-                    //Checkbox event listener
-                    checkbox.addEventListener('click', () => {
-                        if(isEditing) {
-                            alert('Please save your edit before checking off the item.')
-                            return;
-                        }
-                        checkbox.classList.toggle('checked');
-                        if (checkbox.classList.contains('checked')) {
-                            product.checked = true;
+                        // If the product is checked, when the list is re-rendered it is still checked
+                        if (product.checked) {
+                            checkbox.classList.add('checked');
                             listItemContainer.classList.add('inactive');
                             modifyButton.disabled = true;
                             removeButton.disabled = true;
-                            saveButton.disabled = true;
                         }
 
-                        else {
-                            product.checked = false;
-                            listItemContainer.classList.remove('inactive');
-                            modifyButton.disabled = false;
-                            removeButton.disabled = false;
-                            saveButton.disabled = false;
-                        }
+                        //Checkbox event listener
+                        checkbox.addEventListener('click', () => {
+                            if(isEditing) {
+                                alert('Please save your edit before checking off the item.')
+                                return;
+                            }
 
-                        saveToLocalStorage(storedProducts);
-                    })
+                            checkbox.classList.toggle('checked');
 
-    
+                            if (checkbox.classList.contains('checked')) {
+                                product.checked = true;
+                                listItemContainer.classList.add('inactive');
+                                modifyButton.disabled = true;
+                                removeButton.disabled = true;
+                                saveButton.disabled = true;
+                            }
 
-                    // Build the checkbox
-                    itemCheckbox.appendChild(checkbox);
+                            else {
+                                product.checked = false;
+                                listItemContainer.classList.remove('inactive');
+                                modifyButton.disabled = false;
+                                removeButton.disabled = false;
+                                saveButton.disabled = false;
+                            }
 
-                    // Build the list item
-
-                    productInfoContainer.appendChild(itemCheckbox);
-                    productInfoContainer.appendChild(productNameSpan);
-                    productInfoContainer.appendChild(quantitySpan);
-                    listItemContainer.appendChild(productInfoContainer);
-                    listItemContainer.appendChild(listButtonContainer);
-                    listItem.appendChild(listItemContainer);
-                    list.appendChild(listItem);
-                    removeButton.addEventListener('click', function () {
-                        removeItem(product.name);
-                    })
-                    modifyButton.addEventListener('click', function () {
-                        isEditing = true;
-                        const quantityField = document.createElement('input');
-                        const quantityContainer = document.createElement('div');
-                        quantityContainer.className = 'quantityContainer';
-                        quantityField.type = 'number';
-                        quantityField.min = '1';
-                        quantityField.value = quantitySpan.textContent;
-                        quantityField.className = 'editQuantityField';
-                        const decreaseButton = createDecreaseButton();
-                        const increaseButton = createIncreaseButton();
-                        decreaseButton.id = 'decButton';
-                        increaseButton.id = 'incButton';
-                        decreaseButton.addEventListener('click', () => decreaseButtonFunc(quantityField));
-                        increaseButton.addEventListener('click', () => increaseButtonFunc(quantityField));
-                        
-                        quantityContainer.appendChild(decreaseButton);
-                        quantityContainer.appendChild(quantityField);
-                        quantityContainer.appendChild(increaseButton);
-                        productInfoContainer.replaceChild(quantityContainer, quantitySpan);
-                        listButtonContainer.replaceChild(saveButton, modifyButton);
-                          
-                        /*
-                            This create an updated array that uses the map method to create a new array based on the storedProducts array.
-                            It them compares the names of each product to find the matching one and updates the quantity with the one entered.
-                            The updated array is then saved back to local storage.
-                        */
-
-                        saveButton.addEventListener('click', function () {
-                            isEditing = false;
-                            const updatedQuantity = parseInt(quantityField.value, 10);
-                            if(updatedQuantity > 0) {
-                                if(updatedQuantity <= 100) {
-                                let updatedProducts = storedProducts.map(p => {
-                                    if (p.name === product.name) {
-                                        return ({...p, quantity: updatedQuantity});
-                                    }
-
-                                    else {
-                                        return p;
-                                    }
-                            })
-                            saveToLocalStorage(updatedProducts);
-
-                            /* 
-                                The storedProducts array is then assigned the new updatedProducts array. If this is not included then the 
-                                storedProducts array will not be the most up to date.This ensure that each time the storedProducts array is mapped
-                                over it is creating a new array based on the most up to date data.
-                            */
-                            storedProducts = updatedProducts;
-                            
-                        // Update the DOM with the updated quantity
-                        quantitySpan.textContent = `${updatedQuantity}`;
-                        productInfoContainer.replaceChild(quantitySpan, quantityContainer);
-                        listButtonContainer.replaceChild(modifyButton, saveButton);
-
-                        }
-
-                        else {
-                            alert('The maximum allowed quantity is 100. Please enter a lower quantity.');
-                        }
-                    }
-
-                        else if (updatedQuantity === 0) {
-                            removeItem(product.name);
-                        }
-
-                        else {
-                            alert('Quantity cannot be negative.');
-                        }
+                            saveToLocalStorage(storedProducts);
                         })
-                    })
-            })
+
+        
+
+                        // Build the checkbox
+                        itemCheckbox.appendChild(checkbox);
+
+                        // Build the list item
+                        productInfoContainer.appendChild(itemCheckbox);
+                        productInfoContainer.appendChild(productNameSpan);
+                        productInfoContainer.appendChild(quantitySpan);
+                        listItemContainer.appendChild(productInfoContainer);
+                        listItemContainer.appendChild(listButtonContainer);
+                        listItem.appendChild(listItemContainer);
+                        list.appendChild(listItem);
+
+                        //  Action Listener to remove an item once the removeButton is clicked
+                        removeButton.addEventListener('click', function () {
+                            removeItem(product.name);
+                        })
+                        modifyButton.addEventListener('click', function () {
+                            isEditing = true;
+                            const quantityField = document.createElement('input');
+                            const quantityContainer = document.createElement('div');
+                            quantityContainer.className = 'quantityContainer';
+                            quantityField.type = 'number';
+                            quantityField.min = '1';
+                            quantityField.value = quantitySpan.textContent;
+                            quantityField.className = 'editQuantityField';
+                            const decreaseButton = createDecreaseButton();
+                            const increaseButton = createIncreaseButton();
+                            decreaseButton.id = 'decButton';
+                            increaseButton.id = 'incButton';
+                            decreaseButton.addEventListener('click', () => decreaseButtonFunc(quantityField));
+                            increaseButton.addEventListener('click', () => increaseButtonFunc(quantityField));
+                            
+                            quantityContainer.appendChild(decreaseButton);
+                            quantityContainer.appendChild(quantityField);
+                            quantityContainer.appendChild(increaseButton);
+                            productInfoContainer.replaceChild(quantityContainer, quantitySpan);
+                            listButtonContainer.replaceChild(saveButton, modifyButton);
+                            
+                            /*
+                                This create an updated array that uses the map method to create a new array based on the storedProducts array.
+                                It them compares the names of each product to find the matching one and updates the quantity with the one entered.
+                                The updated array is then saved back to local storage.
+                            */
+
+                            saveButton.addEventListener('click', function () {
+                                isEditing = false;
+                                const updatedQuantity = parseInt(quantityField.value, 10);
+                                if(updatedQuantity > 0) {
+                                    if(updatedQuantity <= 100) {
+                                    let updatedProducts = storedProducts.map(p => {
+                                        if (p.name === product.name) {
+                                            return ({...p, quantity: updatedQuantity});
+                                        }
+
+                                        else {
+                                            return p;
+                                        }
+                                })
+                                saveToLocalStorage(updatedProducts);
+
+                                /* 
+                                    The storedProducts array is then assigned the new updatedProducts array. If this is not included then the 
+                                    storedProducts array will not be the most up to date.This ensure that each time the storedProducts array is mapped
+                                    over it is creating a new array based on the most up to date data.
+                                */
+                                storedProducts = updatedProducts;
+                                
+                            // Update the DOM with the updated quantity
+                            quantitySpan.textContent = `${updatedQuantity}`;
+                            productInfoContainer.replaceChild(quantitySpan, quantityContainer);
+                            listButtonContainer.replaceChild(modifyButton, saveButton);
+
+                            }
+
+                            else {
+                                alert('The maximum allowed quantity is 100. Please enter a lower quantity.');
+                            }
+                        }
+
+                            else if (updatedQuantity === 0) {
+                                removeItem(product.name);
+                            }
+
+                            else {
+                                alert('Quantity cannot be negative.');
+                            }
+                            })
+                        })
+                })
+                }
             }
-        }
 
     
-
+    // Function that creates the decrease button
     function createDecreaseButton () {
         const decreaseButton = document.createElement('button');
         decreaseButton.textContent = '-';
@@ -376,6 +400,7 @@ async function search (userInput) {
         return decreaseButton;
     }
 
+    // Function that creates the increase button
     function createIncreaseButton () {
         const increaseButton = document.createElement('button');
         increaseButton.textContent = '+';
@@ -384,7 +409,7 @@ async function search (userInput) {
         return increaseButton;
     }
 
-
+    // Function that decreases the quantity by 1 when the decrease button is clicked
     function decreaseButtonFunc (quantityInput) {
         const currentQuantity = parseInt(quantityInput.value);
         if(currentQuantity > 0) {
@@ -392,6 +417,7 @@ async function search (userInput) {
     }
     }
 
+    // Function that increases the quantity by 1 when the increase button is clicked
     function increaseButtonFunc (quantityInput) {
         const currentQuantity = parseInt(quantityInput.value);
         if(currentQuantity < 100) {
@@ -400,9 +426,15 @@ async function search (userInput) {
     }
     
 
+    // Function for removing an item from the grocery list
     function removeItem (productName) {
         const storedProductsString = localStorage.getItem('groceryProducts');
         let storedProducts = JSON.parse(storedProductsString) || [];
+
+        /* 
+            This creates a new array by filtering the storedProducts array. It keeps all of the products where it's name
+            is not equal to the product name being passed to it. The matching product is not added to this new array efefctively removing it 
+        */
         const updatedGroceryList = storedProducts.filter(p => p.name !== productName);
         saveToLocalStorage(updatedGroceryList);
         renderGroceryList();
@@ -414,6 +446,7 @@ async function search (userInput) {
         gridContainer.innerHTML = '';
     }
 
+    // This function saves the porducts array passed to it to local storage
     function saveToLocalStorage(products) {
         localStorage.setItem('groceryProducts', JSON.stringify(products));
     }

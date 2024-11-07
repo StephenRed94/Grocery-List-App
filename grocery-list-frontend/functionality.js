@@ -83,7 +83,7 @@ document.getElementById('clearButton').addEventListener('click', function() {
 
 // Searches the USDA API for grocery products and displays the product's information
 async function search (userInput) {
-    const url = `https://api.nal.usda.gov/fdc/v1/foods/search?query=${userInput}&api_key=eUGeLH7Kzwb3LjivB8RPm26XEHZZIlbyhm4tMW3A`;
+    const url = `http://localhost:5000/api/search?query=${userInput}`;
     const productGridContainer = document.getElementById('productGrid');
     
     // This creates a new set for the products that are to be displayed
